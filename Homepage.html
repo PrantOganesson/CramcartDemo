@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CramCart – Study what matters</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --lavender: #c9c0f0; --lavender-light: #ddd8f8; --lavender-bg: #ede9fc;
+    --purple: #7c5cbf; --purple-dark: #5a3fa0;
+    --text-dark: #1a1a2e; --text-mid: #444466;
+    --star-yellow: #f5a623; --white: #ffffff;
+    --card-bg: #f0ecfc; --footer-bg: #f7f5ff; --border: #c4bbee;
+    --green: #22c55e; --red: #ef4444;
+  }
+  body { font-family: 'Nunito', sans-serif; background: var(--white); color: var(--text-dark); overflow-x: hidden; }
+
+  /* NAV */
+  nav { display: flex; align-items: flex-start; justify-content: space-between; padding: 22px 40px 0; position: relative; z-index: 100; }
+  .nav-left { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .nav-buttons { display: flex; gap: 12px; }
+  .btn-pill { display: inline-flex; align-items: center; gap: 7px; padding: 9px 22px; border-radius: 999px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; cursor: pointer; border: none; transition: transform 0.15s, box-shadow 0.15s; }
+  .btn-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+  .btn-dark { background: #1a1a2e; color: var(--white); }
+  .cart-widget { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform 0.15s; }
+  .cart-widget:hover { transform: scale(1.08); }
+  .cart-icon-wrap { width: 62px; height: 56px; border: 2.5px solid var(--text-dark); border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .cart-icon-wrap svg { width: 38px; height: 38px; }
+  .cart-badge { position: absolute; top: -8px; right: -8px; background: var(--purple); color: white; font-size: 0.68rem; font-weight: 900; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0); transition: all 0.2s; }
+  .cart-badge.show { opacity: 1; transform: scale(1); }
+  .cart-label { font-weight: 800; font-size: 0.9rem; color: var(--text-dark); }
+  .hero-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-end; text-align: right; margin-top: -8px; max-width: 600px; margin-left: auto; animation: fadeUp 0.6s ease both; }
+  .brand-name { font-family: 'Fredoka One', cursive; font-size: 4rem; line-height: 1; color: var(--text-dark); display: flex; align-items: center; gap: 2px; }
+  .brand-name span.purple { color: var(--purple); }
+  .brand-star { color: var(--purple); font-size: 2.2rem; position: relative; top: -18px; margin-left: 2px; }
+  .tagline { font-family: 'Fredoka One', cursive; font-size: 1.75rem; color: var(--text-dark); margin-top: 2px; }
+  .tagline span { color: var(--purple); }
+  .hero-desc { font-size: 0.98rem; color: var(--text-mid); margin-top: 10px; line-height: 1.6; font-weight: 600; }
+
+  /* HERO */
+  .hero { position: relative; background: var(--white); padding: 0 40px 50px; overflow: visible; }
+  .hero-blob { position: absolute; top: -60px; right: -80px; width: 520px; height: 480px; background: var(--lavender); border-radius: 0 0 0 60%; z-index: 0; }
+  .hero-blob-2 { position: absolute; top: 200px; right: -60px; width: 320px; height: 300px; background: var(--lavender-light); border-radius: 50% 0 0 50%; z-index: 0; }
+
+  /* SEARCH */
+  .search-section { position: relative; z-index: 50; display: flex; flex-direction: column; align-items: center; margin-top: 38px; gap: 10px; animation: fadeUp 0.6s 0.15s ease both; }
+  .search-bar { display: flex; align-items: center; gap: 10px; border: 2.5px solid var(--purple); border-radius: 12px; padding: 10px 16px; background: var(--white); width: 480px; }
+  .search-divider { width: 2px; height: 26px; background: var(--border); border-radius: 2px; flex-shrink: 0; }
+  .search-icon-btn { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--purple); display: flex; align-items: center; flex-shrink: 0; }
+
+  /* Dropdown */
+  .dd-wrap { position: relative; }
+  .dd-trigger { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 1rem; color: var(--purple); cursor: pointer; user-select: none; white-space: nowrap; padding: 2px 4px; border-radius: 6px; transition: background 0.15s; }
+  .dd-trigger:hover { background: var(--lavender-bg); }
+  .dd-arrow { width: 22px; height: 22px; background: var(--purple); border-radius: 5px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; transition: transform 0.2s; flex-shrink: 0; }
+  .dd-arrow.open { transform: rotate(180deg); }
+  .dd-label { min-width: 60px; }
+  .dd-panel { position: absolute; top: calc(100% + 10px); left: 0; background: var(--white); border: 2px solid var(--lavender); border-radius: 12px; min-width: 160px; box-shadow: 0 8px 28px rgba(124,92,191,0.2); z-index: 200; overflow: hidden; display: none; }
+  .dd-panel.show { display: block; animation: dropIn 0.18s ease; }
+  @keyframes dropIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
+  .dd-option { padding: 10px 16px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.12s; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+  .dd-option:hover { background: var(--lavender-bg); color: var(--purple); }
+  .dd-option.selected { background: var(--lavender); color: var(--purple-dark); }
+  .dd-check { font-size: 0.8rem; opacity: 0; width: 14px; }
+  .dd-option.selected .dd-check { opacity: 1; }
+  .dd-clear { padding: 8px 16px; font-size: 0.82rem; font-weight: 800; color: var(--red); cursor: pointer; border-top: 1px solid var(--border); }
+  .dd-clear:hover { background: #fef2f2; }
+
+  /* Filter pills */
+  .active-filters { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; min-height: 10px; }
+  .filter-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--lavender); border-radius: 999px; font-size: 0.82rem; font-weight: 800; color: var(--purple-dark); }
+  .filter-pill button { background: none; border: none; cursor: pointer; font-size: 0.85rem; color: var(--purple-dark); line-height: 1; padding: 0; }
+
+  /* COURSES */
+  .section { padding: 50px 40px 30px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .section-title { font-family: 'Fredoka One', cursive; font-size: 1.9rem; color: var(--text-dark); }
+  .result-count { font-size: 0.88rem; font-weight: 700; color: var(--text-mid); margin-left: 10px; }
+  .see-all { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1rem; color: var(--text-dark); cursor: pointer; text-decoration: none; transition: gap 0.2s; }
+  .see-all:hover { gap: 14px; }
+  .courses-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .course-card { background: var(--card-bg); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s, box-shadow 0.2s; border: 2px solid transparent; animation: fadeUp 0.4s ease both; }
+  .course-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(124,92,191,0.18); border-color: var(--lavender); }
+  .card-top { display: flex; align-items: center; justify-content: space-between; }
+  .course-code { font-family: 'Fredoka One', cursive; font-size: 1.25rem; color: var(--text-dark); }
+  .faculty-tag { font-weight: 800; font-size: 0.82rem; color: var(--purple-dark); background: var(--lavender); padding: 3px 10px; border-radius: 999px; }
+  .card-illustration { background: var(--lavender-light); border-radius: 12px; height: 130px; display: flex; align-items: center; justify-content: center; }
+  .card-illustration svg { width: 78px; height: 78px; stroke: var(--text-dark); fill: none; stroke-width: 1.8; }
+  .card-seller { font-weight: 700; font-size: 1rem; }
+  .stars { display: flex; gap: 3px; font-size: 1.2rem; }
+  .star-on { color: var(--star-yellow); }
+  .star-off { color: #ccc; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .price { font-family: 'Fredoka One', cursive; font-size: 1.35rem; }
+  .add-cart-btn { background: var(--purple); border: none; border-radius: 8px; padding: 7px 10px; cursor: pointer; transition: transform 0.15s, background 0.15s; display: flex; align-items: center; }
+  .add-cart-btn:hover { transform: scale(1.12); background: var(--purple-dark); }
+  .add-cart-btn.added { background: var(--green); }
+  .add-cart-btn svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2.2; }
+  .no-results { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-mid); }
+  .no-results h3 { font-family: 'Fredoka One', cursive; font-size: 1.4rem; margin-bottom: 8px; }
+
+  /* CART MODAL */
+  .cart-overlay { position: fixed; inset: 0; background: rgba(26,26,46,0.45); z-index: 500; display: none; justify-content: flex-end; padding: 20px; }
+  .cart-overlay.open { display: flex; }
+  .cart-modal { background: var(--white); border-radius: 18px; width: 340px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: slideIn 0.25s ease; overflow: hidden; margin-top: 80px; }
+  @keyframes slideIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+  .cart-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1.5px solid var(--border); }
+  .cart-header h3 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; }
+  .cart-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-mid); }
+  .cart-items { flex: 1; overflow-y: auto; padding: 12px 20px; display: flex; flex-direction: column; gap: 10px; }
+  .cart-empty { text-align: center; padding: 40px 0; color: var(--text-mid); font-weight: 700; font-size: 0.95rem; }
+  .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--card-bg); border-radius: 10px; gap: 8px; }
+  .cart-item-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .cart-item-name { font-weight: 800; font-size: 0.95rem; }
+  .cart-item-sub { font-size: 0.76rem; color: var(--text-mid); font-weight: 600; }
+  .cart-item-price { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--purple); white-space: nowrap; }
+  .cart-item-remove { background: none; border: none; cursor: pointer; color: var(--red); font-size: 1rem; flex-shrink: 0; }
+  .cart-footer-inner { padding: 16px 20px; border-top: 1.5px solid var(--border); }
+  .cart-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1rem; margin-bottom: 12px; }
+  .cart-total span:last-child { font-family: 'Fredoka One', cursive; font-size: 1.15rem; color: var(--purple); }
+  .checkout-btn { width: 100%; padding: 12px; background: var(--purple); color: white; border: none; border-radius: 10px; font-family: 'Fredoka One', cursive; font-size: 1.1rem; cursor: pointer; transition: background 0.15s; }
+  .checkout-btn:hover { background: var(--purple-dark); }
+
+  /* AUTH MODAL */
+  .auth-overlay { position: fixed; inset: 0; background: rgba(26,26,46,0.5); z-index: 600; display: none; align-items: center; justify-content: center; }
+  .auth-overlay.open { display: flex; }
+  .auth-modal { background: var(--white); border-radius: 20px; width: 360px; padding: 36px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.22); animation: fadeUp 0.25s ease; position: relative; }
+  .auth-modal h2 { font-family: 'Fredoka One', cursive; font-size: 1.8rem; margin-bottom: 4px; }
+  .auth-modal p { font-size: 0.88rem; color: var(--text-mid); margin-bottom: 20px; font-weight: 600; }
+  .auth-close-btn { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-mid); }
+  .auth-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .auth-field label { font-weight: 800; font-size: 0.85rem; color: var(--text-mid); }
+  .auth-field input { padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 600; outline: none; transition: border-color 0.15s; }
+  .auth-field input:focus { border-color: var(--purple); }
+  .auth-submit { width: 100%; padding: 12px; background: var(--text-dark); color: white; border: none; border-radius: 10px; font-family: 'Fredoka One', cursive; font-size: 1.1rem; cursor: pointer; margin-top: 6px; transition: background 0.15s; }
+  .auth-submit:hover { background: var(--purple); }
+  .auth-switch { text-align: center; margin-top: 14px; font-size: 0.85rem; font-weight: 700; color: var(--text-mid); }
+  .auth-switch span { color: var(--purple); cursor: pointer; text-decoration: underline; }
+  .auth-err { background: #fef2f2; color: var(--red); font-size: 0.82rem; font-weight: 700; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; display: none; }
+  .auth-err.show { display: block; }
+
+  /* WHY */
+  .why-section { padding: 30px 40px 50px; text-align: center; }
+  .why-title { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--text-dark); margin-bottom: 28px; }
+  .why-grid { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
+  .why-item { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 90px; }
+  .why-icon svg { width: 44px; height: 44px; stroke: var(--text-dark); fill: none; stroke-width: 1.6; }
+  .why-label { font-size: 0.78rem; font-weight: 700; color: var(--text-mid); text-align: center; line-height: 1.4; }
+
+  /* FOOTER */
+  footer { border-top: 1.5px solid var(--border); background: var(--footer-bg); padding: 36px 40px 28px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 24px; align-items: start; }
+  .footer-brand .brand-name-sm { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--text-dark); display: flex; align-items: center; gap: 2px; margin-bottom: 8px; }
+  .footer-brand .brand-name-sm span { color: var(--purple); }
+  .footer-star { color: var(--purple); font-size: 1rem; position: relative; top: -6px; }
+  .footer-copy { font-size: 0.78rem; color: var(--text-mid); font-weight: 600; line-height: 1.6; }
+  .footer-col h4 { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px; }
+  .footer-col a { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-mid); text-decoration: none; margin-bottom: 6px; transition: color 0.15s; }
+  .footer-col a:hover { color: var(--purple); }
+  .social-icons { display: flex; gap: 10px; margin-top: 4px; }
+  .social-circle { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s; font-weight: 900; }
+  .social-circle:hover { transform: scale(1.12); }
+  .sc-fb { background: #1877f2; color: #fff; font-size: 1.2rem; }
+  .sc-x  { background: #000; color: #fff; font-size: 1.1rem; }
+  .sc-ig { background: radial-gradient(circle at 30% 110%, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888); color: #fff; }
+  .sc-li { background: #0a66c2; color: #fff; font-size: 0.85rem; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--text-dark); color: white; padding: 12px 24px; border-radius: 999px; font-weight: 800; font-size: 0.9rem; z-index: 999; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @keyframes fadeUp { from { opacity:0; transform: translateY(22px); } to { opacity:1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <button class="auth-close-btn" onclick="closeAuth()">✕</button>
+    <h2 id="authTitle">Login</h2>
+    <p id="authSub">Welcome back! Sign in to your account.</p>
+    <div class="auth-err" id="authErr"></div>
+    <div class="auth-field" id="nameWrap" style="display:none">
+      <label>Full Name</label>
+      <input type="text" id="authName" placeholder="Your name" />
+    </div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="authEmail" placeholder="you@email.com" />
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="authPass" placeholder="••••••••" />
+    </div>
+    <button class="auth-submit" id="authBtn" onclick="handleAuth()">Login</button>
+    <div class="auth-switch" id="authSwitch">Don't have an account? <span onclick="switchAuth()">Sign Up</span></div>
+  </div>
+</div>
+
+<!-- CART MODAL -->
+<div class="cart-overlay" id="cartOverlay" onclick="handleCartBg(event)">
+  <div class="cart-modal">
+    <div class="cart-header">
+      <h3>🛒 My Cart</h3>
+      <button class="cart-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer-inner" id="cartFoot" style="display:none">
+      <div class="cart-total"><span>Total</span><span id="cartTotalAmt">BDT 0</span></div>
+      <button class="checkout-btn" onclick="doCheckout()">Checkout →</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-buttons">
+      <button class="btn-pill btn-dark" onclick="openAuth('login')">LOGIN ☞</button>
+      <button class="btn-pill btn-dark" onclick="openAuth('signup')">SIGN UP ☞</button>
+    </div>
+    <div class="cart-widget" onclick="openCart()">
+      <div class="cart-icon-wrap">
+        <span class="cart-badge" id="cartBadge">0</span>
+        <svg viewBox="0 0 48 48" fill="none" stroke="#1a1a2e" stroke-width="2.2">
+          <path d="M8 12h32l-4 18H12L8 12z"/>
+          <path d="M8 12L6 4H2"/>
+          <circle cx="16" cy="36" r="3"/><circle cx="32" cy="36" r="3"/>
+          <line x1="16" y1="18" x2="16" y2="26"/><line x1="24" y1="16" x2="24" y2="26"/>
+          <line x1="32" y1="18" x2="32" y2="26"/><line x1="12" y1="22" x2="36" y2="22"/>
+        </svg>
+      </div>
+      <span class="cart-label">My Cart</span>
+    </div>
+  </div>
+  <div class="hero-content">
+    <div class="brand-name">Cram<span class="purple">Cart</span><span class="brand-star">✦</span></div>
+    <div class="tagline">Study what <span>matters</span></div>
+    <p class="hero-desc">Access premium study notes, created by<br>students , for students.</p>
+  </div>
+</nav>
+
+<!-- HERO + SEARCH -->
+<div class="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-blob-2"></div>
+  <div class="search-section">
+    <div class="search-bar">
+      <!-- Course dropdown -->
+      <div class="dd-wrap">
+        <div class="dd-trigger" onclick="toggleDD('course')">
+          <span class="dd-label" id="courseLabel">Course</span>
+          <div class="dd-arrow" id="courseArrow">▾</div>
+        </div>
+        <div class="dd-panel" id="coursePanel"></div>
+      </div>
+      <div class="search-divider"></div>
+      <!-- Faculty dropdown -->
+      <div class="dd-wrap">
+        <div class="dd-trigger" onclick="toggleDD('faculty')">
+          <span class="dd-label" id="facultyLabel">Faculty</span>
+          <div class="dd-arrow" id="facultyArrow">▾</div>
+        </div>
+        <div class="dd-panel" id="facultyPanel"></div>
+      </div>
+      <button class="search-icon-btn" onclick="doSearch
